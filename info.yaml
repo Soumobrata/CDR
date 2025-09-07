@@ -1,56 +1,63 @@
 # Tiny Tapeout project information
 project:
-  title:        ""      # Project title
-  author:       ""      # Your name
-  discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  ""      # One line description of what your project does
-  language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
-  clock_hz:     0       # Clock frequency in Hz (or 0 if not applicable)
+  title:        "AI-Assisted Hybrid CDR (Demo)"
+  author:       "Soumobrata Ghosh"
+  discord:      "" 
+  description:  "Compact digital CDR core with MMPD + PI loop; exposes recovered clock, lock, and debug taps"
+  language:     "Verilog"
+  clock_hz:     0
 
-  # How many tiles your design occupies? A single tile is about 167x108 uM.
-  tiles: "1x1"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2 or 8x2
+  tiles: "1x1"
 
-  # Your top module name must start with "tt_um_". Make it unique by including your github username:
-  top_module:  "tt_um_example"
+  # Make sure your RTL top matches TinyTapeout IO (io_in, io_out, io_oeb)
+  top_module:  "tt_um_sghosh_cdr_demo"
 
-  # List your project's source files here.
-  # Source files must be in ./src and you must list each source file separately, one per line.
-  # Don't forget to also update `PROJECT_SOURCES` in test/Makefile.
+  # These files should live in ./src and each one must be listed.
+  # Also mirror this list in test/Makefile under PROJECT_SOURCES.
   source_files:
-    - "project.v"
+    - "cdr_top.v"
+    - "vco.v"
+    - "sampler.v"
+    - "quantizer.v"
+    - "mmpd.v"
+    - "loop_filter.v"
+    - "delay_s_n.v"
+    - "delay_d_n.v"
+    - "error_gen.v"
 
-# The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
-# This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
+# The pinout of your project. Leave unused pins blank.
 pinout:
   # Inputs
-  ui[0]: ""
-  ui[1]: ""
-  ui[2]: ""
-  ui[3]: ""
-  ui[4]: ""
-  ui[5]: ""
-  ui[6]: ""
-  ui[7]: ""
+  ui[0]: "RST_N"
+  ui[1]: "EN"
+  ui[2]: "DATA_IN[0]"      # optional: 2-bit symbol input (e.g., PAM4)
+  ui[3]: "DATA_IN[1]"
+  ui[4]: "KP_SEL[0]"       # loop gain select / config
+  ui[5]: "KP_SEL[1]"
+  ui[6]: "KI_SEL[0]"
+  ui[7]: "KI_SEL[1]"
 
   # Outputs
-  uo[0]: ""
-  uo[1]: ""
-  uo[2]: ""
-  uo[3]: ""
-  uo[4]: ""
-  uo[5]: ""
-  uo[6]: ""
-  uo[7]: ""
+  uo[0]: "CLK_REC"         # recovered sample clock (divided or toggled)
+  uo[1]: "LOCKED"          # simple lock detect
+  uo[2]: "PRBS_OK"         # optional checker flag (if implemented)
+  uo[3]: "SER_FLAG"        # symbol error flag (optional)
+  uo[4]: "D_OUT[0]"        # decided symbol/bit
+  uo[5]: "D_OUT[1]"
+  uo[6]: "HB"              # heartbeat / activity
+  uo[7]: "RESERVED"
 
   # Bidirectional pins
-  uio[0]: ""
-  uio[1]: ""
-  uio[2]: ""
-  uio[3]: ""
-  uio[4]: ""
-  uio[5]: ""
-  uio[6]: ""
-  uio[7]: ""
+  uio[0]: "DBG_VCTRL[0]"   # expose LSBs of v_ctrl or internal debug bus
+  uio[1]: "DBG_VCTRL[1]"
+  uio[2]: "DBG_VCTRL[2]"
+  uio[3]: "DBG_VCTRL[3]"
+  uio[4]: "DBG_VCTRL[4]"
+  uio[5]: "DBG_VCTRL[5]"
+  uio[6]: "DBG_VCTRL[6]"
+  uio[7]: "DBG_VCTRL[7]"
 
 # Do not change!
+yaml_version: 6
+
 yaml_version: 6
