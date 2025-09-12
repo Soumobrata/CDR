@@ -2,20 +2,19 @@
 project:
   title:        "Full Digital CDR with VCO-ADC Front-End"
   author:       "Soumobrata Ghosh"
-  discord:      ""      # optional
+  discord:      ""      
   description:  "CDR with open-loop VCO-ADC sampler, digital loop filter, and recovered clock debug outputs. TinyTapeout-ready."
   language:     "Verilog"
-  clock_hz:     50000000        # board clock (~50 MHz typical)
+  clock_hz:     50000000        #
 
   tiles: "1x1"
   top_module:  "tt_um_sfg_vcoadc_cdr"
 
-  # List your project's source files here (each one in ./src)
   source_files:
     - "tt_um_sfg_vcoadc_cdr.v"
     - "project.v"
 
-# Pinout shown on the datasheet/website (clk/rst_n/ena are implicit from harness)
+
 pinout:
   # Inputs (ui_in[7:0])
   ui[0]: "Y_IN[0]  (LSB)"
