@@ -7,14 +7,11 @@ project:
   language:     "Verilog"
   clock_hz:     50000000        # use board clock (~50 MHz typical)
 
-  tiles: "1x1"
-  top_module:  "tt_um_sfg_vcoadc_frontend"
+top_module: "tt_um_sfg_vcoadc_cdr"
+source_files:
+  - "tt_um_sfg_vcoadc_cdr.v"
+  - "open_loop_vcoadc_fast.v"
 
-  # List your project's source files here (each one in ./src)
-  source_files:
-    - "tt_um_sfg_vcoadc_frontend.v"
-    - "open_loop_vcoadc_fast.v"
-    - "open_loop_vcoadc.v"      # (optional reference; keep if used)
 
 # Pinout shown on the datasheet/website (clk/rst_n/ena are implicit from harness)
 pinout:
