@@ -1,17 +1,18 @@
 # Tiny Tapeout project information
 project:
-  title:        "Open-Loop VCO-ADC Front-End Sampler for CDR"
+  title:        "Full Digital CDR with VCO-ADC Front-End"
   author:       "Soumobrata Ghosh"
   discord:      ""      # optional
-  description:  "8-bit in → 8-bit out sampler using open-loop VCO-ADC, TinyTapeout-ready."
+  description:  "CDR with open-loop VCO-ADC sampler, digital loop filter, and recovered clock debug outputs. TinyTapeout-ready."
   language:     "Verilog"
-  clock_hz:     50000000        # use board clock (~50 MHz typical)
+  clock_hz:     50000000        # board clock (~50 MHz typical)
 
-top_module: "tt_um_sfg_vcoadc_cdr"
-source_files:
-  - "tt_um_sfg_vcoadc_cdr.v"
-  
+  tiles: "1x1"
+  top_module:  "tt_um_sfg_vcoadc_cdr"
 
+  # List your project's source files here (each one in ./src)
+  source_files:
+    - "tt_um_sfg_vcoadc_cdr.v"
 
 # Pinout shown on the datasheet/website (clk/rst_n/ena are implicit from harness)
 pinout:
@@ -26,14 +27,14 @@ pinout:
   ui[7]: "Y_IN[7]  (MSB)"
 
   # Outputs (uo_out[7:0])
-  uo[0]: "X_OUT[0] (LSB)"
-  uo[1]: "X_OUT[1]"
-  uo[2]: "X_OUT[2]"
-  uo[3]: "X_OUT[3]"
-  uo[4]: "X_OUT[4]"
-  uo[5]: "X_OUT[5]"
-  uo[6]: "X_OUT[6]"
-  uo[7]: "X_OUT[7] (MSB)"
+  uo[0]: "SAMPLE_EN (1-cycle pulse)"
+  uo[1]: "REC_CLK (50% duty)"
+  uo[2]: "SAMPLER_OUT[2]"
+  uo[3]: "SAMPLER_OUT[3]"
+  uo[4]: "SAMPLER_OUT[4]"
+  uo[5]: "SAMPLER_OUT[5]"
+  uo[6]: "SAMPLER_OUT[6]"
+  uo[7]: "SAMPLER_OUT[7] (MSB)"
 
   # Bidirectional pins (unused)
   uio[0]: ""
