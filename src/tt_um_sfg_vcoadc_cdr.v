@@ -1,19 +1,4 @@
-// ============================================================================
-// TinyTapeout: Full Digital CDR with VCO-ADC Front-End (All-in-One)
-// Top: tt_um_sfg_vcoadc_cdr
-//
-// Exposed debug:
-//   uo_out[0] : sample_en pulse (1 clk long)       -> max ~f_clk
-//   uo_out[1] : recovered clock (T-FF, 50% duty)   -> max ~f_clk/2
-//   uo_out[7:2] : x_n[7:2] sampler MSBs
-//
-// All logic synchronous to TinyTapeout harness `clk` (e.g., 50 MHz).
-// No derived/gated clocks; recovered timing appears as strobe (sample_en).
-// ============================================================================
 
-// ----------------------------------------------------------------------------
-// TOP-LEVEL: TT harness wrapper
-// ----------------------------------------------------------------------------
 module tt_um_sfg_vcoadc_cdr (
     input  wire [7:0] ui_in,
     output wire [7:0] uo_out,
