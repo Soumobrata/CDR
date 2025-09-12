@@ -275,6 +275,7 @@ module open_loop_vcoadc_fast #(
   end
 endmodule
 
+
 // ----------------------------------------------------------------------------
 module quantizer_sign2b (
   input  wire signed [7:0] x_n,
@@ -286,10 +287,11 @@ module quantizer_sign2b (
   // 2-bit graded decision
   wire neg = x_n[7];
   wire [6:0] mag = neg ? (~x_n[6:0] + 1'b1) : x_n[6:0];
-  wire weak = (mag < 7'd8);
-  assign d_q2 = neg ? (weak ? 2'b01 : 2'b00)
-                    : (weak ? 2'b10 : 2'b11);
+  wire is_weak = (mag < 7'd8);  // <- renamed from 'weak'
+  assign d_q2 = neg ? (is_weak ? 2'b01 : 2'b00)
+                    : (is_weak ? 2'b10 : 2'b11);
 endmodule
+
 
 // ----------------------------------------------------------------------------
 // Mueller–Müller PD (symbol-spaced): f_n = d_k * x_{k-1} - d_{k-1} * x_k
