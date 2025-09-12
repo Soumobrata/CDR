@@ -6,31 +6,28 @@ module tt_um_sfg_vcoadc_cdr (
     output wire [7:0] uio_out,
     output wire [7:0] uio_oe,
     input  wire       ena,
-    input  wire       clk,      // e.g., 50 MHz
+    input  wire       clk,      
     input  wire       rst_n
 );
 
-  // Enable/reset
+ 
   wire rst    = ~rst_n;
   wire active = ena & ~rst;
 
-  // Treat ui_in as signed stimulus to the front-end
+
   wire signed [7:0] y_n = ui_in;
 
   // CDR core signals
-  wire        sample_en;          // recovered timing strobe
-  wire signed [7:0] x_n;          // sampler output code
+  wire        sample_en;          // recovered clock
+  wire signed [7:0] x_n;          // sampler output
   wire        d_bb;
   wire [1:0]  d_q2;
   wire signed [31:0] v_ctrl;
-  wire signed [31:0] dfcw;        // <-- signed delta FCW
+  wire signed [31:0] dfcw;        //  signed delta FCW
 
   // ---------------- CDR CORE ----------------
   cdr_core #(
-    // NCO/DCO configuration
     .PHASE_BITS      (32),
-    // Example nominal FCW (~1 MHz strobe at 50 MHz clk). Adjust to your symbol rate:
-    // FCW = f_sym / f_clk * 2^PHASE_BITS
     .FCW_NOM         (32'd85_899_345),
 
     // VCO-ADC sampler configuration
@@ -68,19 +65,17 @@ module tt_um_sfg_vcoadc_cdr (
   end
 
   // Outputs
-  assign uo_out[0]   = active ? sample_en : 1'b0;     // pulse (max ~f_clk)
-  assign uo_out[1]   = active ? rec_clk_ff : 1'b0;    // 50% duty (max ~f_clk/2)
-  assign uo_out[7:2] = active ? x_n[7:2] : 6'h00;     // sampler MSBs
+  assign uo_out[0]   = active ? sample_en : 1'b0;     
+  assign uo_out[1]   = active ? rec_clk_ff : 1'b0;    
+  assign uo_out[7:2] = active ? x_n[7:2] : 6'h00;     
 
-  // Required tie-offs for unused bidir pins
+  
   assign uio_out = 8'h00;
   assign uio_oe  = 8'h00;
 
 endmodule
 
-// ----------------------------------------------------------------------------
-// CDR CORE: NCO -> sampler -> quantizer -> MMPD -> PI -> ΔFCW
-// ----------------------------------------------------------------------------
+
 module cdr_core #(
   // NCO/DCO
   parameter integer PHASE_BITS = 32,
@@ -110,10 +105,10 @@ module cdr_core #(
   output wire [1:0]         d_q2,
 
   output wire signed [31:0] v_ctrl,
-  output wire signed [31:0] dfcw   // <-- signed
+  output wire signed [31:0] dfcw   
 );
 
-  // NCO/DCO: produces sample_en on overflow/carry
+  // NCO/DCO
   wire [PHASE_BITS-1:0] phase;
   nco_dco #(
     .PHASE_BITS (PHASE_BITS)
@@ -126,7 +121,7 @@ module cdr_core #(
     .sample_en (sample_en)
   );
 
-  // Sampler: CE-based VCO-ADC (updates only on sample_en)
+  // Sampler
   sampler_ce #(
     .PHASE_BITS (SAMP_PHASE_BITS),
     .FCW        (SAMP_FCW),
@@ -135,7 +130,7 @@ module cdr_core #(
     .X_SHIFT    (X_SHIFT)
   ) u_samp (
     .clk       (clk),
-    .rst       (rst),         // reset added
+    .rst       (rst),         
     .sample_en (sample_en),
     .y_n       (y_n),
     .x_n       (x_n)
@@ -213,7 +208,7 @@ module sampler_ce #(
 endmodule
 
 // ----------------------------------------------------------------------------
-// Pipelined Open-Loop VCO-ADC (sampler engine)
+// Open-Loop VCO-ADC (sampler)
 // ----------------------------------------------------------------------------
 module open_loop_vcoadc_fast #(
   parameter integer PHASE_BITS = 24,
@@ -309,7 +304,7 @@ module mmpd_mueller (
 endmodule
 
 // ----------------------------------------------------------------------------
-// Loop Filter: fixed-point PI
+// Loop Filter
 // v_ctrl += (f_n >>> KP_SHIFT) + (sum_f >>> KI_SHIFT)  on sample_en
 // ----------------------------------------------------------------------------
 module loop_filter_pi #(
@@ -339,7 +334,7 @@ module loop_filter_pi #(
 endmodule
 
 // ----------------------------------------------------------------------------
-// NCO/DCO: phase accumulator; sample_en on carry-out
+// NCO/DCO:
 // ----------------------------------------------------------------------------
 module nco_dco #(
   parameter integer PHASE_BITS = 32
