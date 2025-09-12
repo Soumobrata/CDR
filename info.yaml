@@ -10,7 +10,7 @@ project:
 top_module: "tt_um_sfg_vcoadc_cdr"
 source_files:
   - "tt_um_sfg_vcoadc_cdr.v"
-  - "open_loop_vcoadc_fast.v"
+  
 
 
 # Pinout shown on the datasheet/website (clk/rst_n/ena are implicit from harness)
