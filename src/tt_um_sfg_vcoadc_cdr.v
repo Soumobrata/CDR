@@ -38,7 +38,7 @@ module tt_um_sfg_vcoadc_cdr (
   wire        d_bb;
   wire [1:0]  d_q2;
   wire signed [31:0] v_ctrl;
-  wire [31:0] dfcw;
+  wire signed [31:0] dfcw;        // <-- signed delta FCW
 
   // ---------------- CDR CORE ----------------
   cdr_core #(
@@ -125,7 +125,7 @@ module cdr_core #(
   output wire [1:0]         d_q2,
 
   output wire signed [31:0] v_ctrl,
-  output wire [31:0]        dfcw
+  output wire signed [31:0] dfcw   // <-- signed
 );
 
   // NCO/DCO: produces sample_en on overflow/carry
@@ -150,6 +150,7 @@ module cdr_core #(
     .X_SHIFT    (X_SHIFT)
   ) u_samp (
     .clk       (clk),
+    .rst       (rst),         // reset added
     .sample_en (sample_en),
     .y_n       (y_n),
     .x_n       (x_n)
@@ -185,7 +186,7 @@ module cdr_core #(
     .v_ctrl (v_ctrl)
   );
 
-  // v_ctrl -> ΔFCW
+  // v_ctrl -> ΔFCW  (signed mapping)
   assign dfcw = $signed(v_ctrl) >>> DFCW_SHIFT;
 
 endmodule
@@ -201,6 +202,7 @@ module sampler_ce #(
   parameter integer X_SHIFT    = 8
 )(
   input  wire               clk,
+  input  wire               rst,
   input  wire               sample_en,
   input  wire signed [7:0]  y_n,
   output reg  signed [7:0]  x_n
@@ -220,8 +222,8 @@ module sampler_ce #(
   );
 
   always @(posedge clk) begin
-    if (sample_en)
-      x_n <= x_next;
+    if (rst)         x_n <= 8'sd0;
+    else if (sample_en) x_n <= x_next;
   end
 endmodule
 
@@ -358,12 +360,16 @@ module nco_dco #(
   input  wire                      clk,
   input  wire                      rst,
   input  wire [PHASE_BITS-1:0]     fcw_nom,
-  input  wire [PHASE_BITS-1:0]     dfcw,      // signed add (casted)
+  input  wire signed [PHASE_BITS-1:0] dfcw,  // <-- signed delta FCW
   output reg  [PHASE_BITS-1:0]     phase,
   output wire                      sample_en
 );
-  wire [PHASE_BITS:0] fcw_sum = {1'b0, fcw_nom} + $signed({1'b0, dfcw});
-  wire [PHASE_BITS:0] add     = {1'b0, phase} + fcw_sum;
+  // Sign-extend dfcw to PHASE_BITS+1 bits
+  wire signed [PHASE_BITS:0] dfcw_ext = {dfcw[PHASE_BITS-1], dfcw};
+
+  // Add nominal FCW + delta
+  wire [PHASE_BITS:0] fcw_sum = {1'b0, fcw_nom} + dfcw_ext;
+  wire [PHASE_BITS:0] add     = {1'b0, phase}   + fcw_sum;
 
   assign sample_en = add[PHASE_BITS];         // carry-out pulse
 
