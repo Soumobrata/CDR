@@ -13,6 +13,7 @@ project:
   # List your project's source files here (each one in ./src)
   source_files:
     - "tt_um_sfg_vcoadc_cdr.v"
+    - "project.v"
 
 # Pinout shown on the datasheet/website (clk/rst_n/ena are implicit from harness)
 pinout:
