@@ -1,47 +1,36 @@
 name: test
-on: [push, workflow_dispatch]
+on: [push, pull_request]
+
 jobs:
   test:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
+      - uses: actions/checkout@v4
 
-      - name: Install iverilog
-        shell: bash
-        run: sudo apt-get update && sudo apt-get install -y iverilog
-
-      # Set Python up and install cocotb
-      - name: Setup python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install Python packages
-        shell: bash
-        run: pip install -r test/requirements.txt
-
-      - name: Run tests
+      - name: Install simulator and Python deps
         run: |
-          cd test
-          make clean
-          make
-          # make will return success even if the test fails, so check for failure in the results.xml
-          ! grep failure results.xml
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+          python -m pip install --upgrade pip
+          pip install -r test/requirements.txt
 
-      - name: Test Summary
-        uses: test-summary/action@v2.3
-        with:
-          paths: "test/results.xml"
+      - name: Run cocotb via Makefile (Icarus)
+        run: |
+          make -C test SIM=icarus WAVES=1
+
+      - name: Upload artifacts (always)
         if: always()
-
-      - name: upload vcd
-        if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-vcd
+          name: sim-artifacts
           path: |
-            test/tb.vcd
             test/results.xml
+            test/*.vcd
+            test/sim_build/**/*.vcd
+            test/sim_build/**/*.fst
+          if-no-files-found: warn
