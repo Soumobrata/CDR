@@ -1,26 +1,30 @@
+
 # Cocotb + Icarus
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 
-# Sources live in ../src
-SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = cdr.v project.v
+# Sources live at the REPO ROOT (not in src/)
+ROOT_DIR := $(abspath $(PWD)/..)
 
-# RTL sim
+# Build dir
 SIM_BUILD = sim_build/rtl
-VERILOG_SOURCES += $(addprefix $(SRC_DIR)/,$(PROJECT_SOURCES))
+
+# Verilog sources (root) + testbench (this folder)
+VERILOG_SOURCES = \
+  $(ROOT_DIR)/cdr.v \
+  $(ROOT_DIR)/project.v \
+  $(PWD)/tb.v
 
 # Share include dir with DUT
-COMPILE_ARGS += -I$(SRC_DIR)
+COMPILE_ARGS += -I$(ROOT_DIR)
 
-# Testbench + cocotb entry
-VERILOG_SOURCES += $(PWD)/tb.v
+# DUT top for cocotb
 TOPLEVEL = tb
 
-# <<< IMPORTANT: use a non-conflicting module name >>>
+# Name of the cocotb Python module (file test_cdr.py)
 MODULE   = test_cdr
 
-# Put the junit XML in the current directory (we're already in test/)
+# JUnit XML in current folder
 export COCOTB_RESULTS_FILE := results.xml
 
 include $(shell cocotb-config --makefiles)/Makefile.sim
