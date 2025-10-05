@@ -3,15 +3,15 @@ from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge
 
 @cocotb.test()
-async def test(dut):
+async def recovered_clock_toggles(dut):
     """Basic TT rules + recovered clock activity."""
     # 50 MHz clock
     cocotb.start_soon(Clock(dut.clk, 20, units="ns").start())
 
     # init
-    dut.rst_n.value = 0
-    dut.ena.value   = 0
-    dut.ui_in.value = 0
+    dut.rst_n.value  = 0
+    dut.ena.value    = 0
+    dut.ui_in.value  = 0
     dut.uio_in.value = 0
 
     # hold reset 5 cycles
@@ -30,7 +30,7 @@ async def test(dut):
     # Enable DUT
     dut.ena.value = 1
 
-    # Drive a gentle signed ramp on ui_in for a while
+    # Drive a gentle ramp on ui_in; watch REC_CLK on bit[1]
     val = 0
     toggles = 0
     prev = (int(dut.uo_out.value) >> 1) & 1  # REC_CLK = uo_out[1]
@@ -45,6 +45,5 @@ async def test(dut):
             toggles += 1
             prev = cur
 
-    # We expect the recovered clock to toggle at least once
+    # Expect at least one toggle
     assert toggles > 0, "Recovered clock (uo_out[1]) did not toggle after enable"
-
